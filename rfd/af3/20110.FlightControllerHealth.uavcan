@@ -1,0 +1,6 @@
+#
+# Flight controller health
+#
+#
+
+float32 ErrorScore

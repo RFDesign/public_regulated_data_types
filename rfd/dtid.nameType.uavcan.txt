@@ -1,0 +1,137 @@
+#		UAVCAN DSDL FILE
+#	Fname: 								EG. dtid.nameType.uavcan
+#	PATH=>
+#	By Author:			
+#
+#	Date:
+#
+#	Specification from uavcan.org
+#	See: http://uavcan.org/Specification/3._Data_structure_description_language/
+###############################################################################################################################
+#	NAMESPACE HIERACHY;
+#		The Namespace hierachy is defined by the directory. (Where each folder Represents a namepace and it hierachial position. directory MUST be Lowercase. Files MUST be written in CamelCase
+#		EG. rfd/equipment/Eng_Mon
+#
+#	MSG data type name;
+#		Case Sensitive (not recomended to use Cased Variants)
+#		Full Data Type name must NOT EXCEED 80 characters in length
+#
+#	MSG data type ID Range; 
+#		[0 -> 20 000] 		Standard message types
+#		[20 000 -> 21 000] 	Vendor Specific message types
+#		[21 000 -> 65536]	Reserved for future use
+#
+#	SERVICE type ID Range;
+#		[0 -> 100]		Standard Service types (0-99?)
+#		[100 -> 200]	Reserved for future use (100-199?)
+#		[200 -> 256]	Vendor-specific service types (200-256)
+#
+#	NODE ID Range;
+#		[0]			Reserved
+#		[1 -> 125]	Valid Range
+#		[126, 127]	Debugger Nodes
+#		*NOTE* NODE ID can be allocated dynamically at runtime
+#
+#	CO-ORDINATE systems;
+#		Avionic Body: [x = forward/thrust], [y = right], [Z = down]
+#		Camera Gimbal: [Z = forward], [X = right], [Y = down]
+#		For world frames, the North-East-Down (NED) notation should be preferred.
+#		The default rotation representation is quaternion, the coefficients are ordered as follows: X, Y, Z, W.
+#
+#	MATRIX Representation;
+#		[M1,1, M1,2, M1,3, M2,2, M2,3, M3,3]
+#
+#	VARAIBLE UNITS;
+#		SI units are to be used where possible.
+#		if other units are used, the variable must be suffixed with the unit, and this must be properly documented.
+#
+#	SERVICE INVOCATION TYPES;
+#		Service invocation consists of 2 network exchange operations. Thus the definition for a service data structure must contain two parts, [Request & Response]
+#		These Parts must be seperated by the '---' operator
+#
+#	DSDL files consist of attributes and Directives.
+#		Attributes can be either a 
+#									- field: variable that can be modified by the application and exchanged via the network
+#									- constant: an immutable value that does not participate in network exchange
+#		Directives are statements that provide instructions to the DSDL compiler.
+#		Comments '#' and service response markers '---'
+#
+#	Attribute definition
+#		Field definition patterns:	
+#		cast_mode field_type field_name
+#		cast_mode field_type[X] field_name
+#		cast_mode field_type[<X] field_name
+#		cast_mode field_type[<=X] field_name
+#		void_type
+#		EG. saturated uint_8 num
+#			truncated float16 i = 1.0
+#		Can be a PRIMITIVE data type (float16, bool) OR a nested data structure within the namespace unless full path is used
+#		
+#		Dynamic Arrays: 	
+#				saturated int arr[x] => array of exactly X items
+#				saturated int arr[<x] => dynamic array (from 0 to x-1) items
+#				saturated int arr[<=x] => dynamic array (from 0 to x) items
+#		* Multi-dimensional arrays are not allowed. (Use nested structure) *
+#
+#		Attribute names must be unique in a message data structure
+#			For a service data type, all attributes must have a unique name within the same part (request/response) of the data type.
+#
+#		CONSTANTS must be of a scalar number. they cannot be arrays or structs. Must be initialized with a non-zero number 
+#			(EG. 123, 0x123, 0b123, 0o123) or a float (15.75, 1575e-2) or boolean )true/false) or a single ASCII caracter, escape sequence, hex literal
+#
+#		The DSDL compiler shall implicitly convert the type of an initializer expression to the constant type if the target type can allocate the value with no data loss.
+#
+#	DATA SERIALIZATION
+#		The 'voidx' data data type is a special field type that is intended for data alignment pirposes. The specification defines 64 distint void types.
+#			void1, void2, void3.... void64(64 padding bits). Padding bits are ignored during data de-serialization
+#
+#	DIRECTIVES
+#		start with '@' and have arguments seperated by whitespaces.
+#			@UNION
+#				unions can be used to allow a data type structures to encode iether of its fields at a time 
+#
+#	NAMING CONVENTIONS
+#		FIELD names and namespace names should be all lowercase with underscores (e.g., field_name, my_namespace).
+#		Constant names should be all uppercase with underscores (e.g., CONSTANT_NAME).
+#		Data type names should be in camelcase with the first letter in uppercase (e.g., TypeName).
+#
+#		MESSAGE names should be nouns or adjectives; service names should be verbs.
+#		The name of a message that carries a command should end with the word “Command”; the name of a message that carries state information should end with the word “Status”.
+#		The name of a service that is designed to obtain or to store data should begin with the word “Get” or “Set”, respectively
+#
+#
+#	DATA TYPE COMPATABILITY
+#	data types are said to be compatable IF thier names AND thier signatures are equal
+#		Compatible data structures must feature the same field types in the same order. IE. the binary alignment must match exactly (can use voidx)
+#		Field names must match exactly. otherwise sematically incompatible
+#		 UAVCAN does not consider constant definitions in signature computation
+#				DSDL SIGNATURE
+#						In order to unsure data type compatibility (and unpredictable behavior), data type signatures are used
+#						Data type signatures are a form of signature hash function.
+#						DSDL signature is the product of the application of the signature hash function to a normalized data type definition
+#						A data type is normalised by 
+#													-	removing all comments
+#													-	removing all constant definitions
+#													-	specify casting
+#													-	use [<=x]
+#													-	Remove unimportant whitespace characters
+#													-	Pre-pend the DSDL definition with the full data type name on a seperate line
+#													-	Replace any '\n' with '0x0A'
+#				DATA TYPE DEFINITION SIGNATURE
+#					The Data type signaure must be found using the hash function.
+#					The data type signature is a sum of the DSDL signatures of all data structures above the said data structure
+#				The hash extension algorithm:
+#					Save the current hash value.
+#					Feed the value the hash needs to be extended with to the hash function, byte by byte, LSB first.
+#					Feed the saved hash value to the hash function, byte by byte, LSB first.
+#					The data type signature computation algorithm has the following properties:
+#					
+#					Data type signature and DSDL signature of the same type are equal if the data type does not contain nested data structures.
+#					Data type signature is guaranteed to match only if all nested data structures are compatible.
+#						
+################################################################################################################
+
+
+
+
+
