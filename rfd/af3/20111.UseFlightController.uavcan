@@ -1,0 +1,8 @@
+#
+# the arbiter sets UseFConBus to the BUS (0-2) it htinks is best, This Bus identfies the bus the message is received on  
+#
+#
+
+uint64 UniqID
+int8 UseFConBus
+int8 ThisBus
