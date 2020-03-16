@@ -1,0 +1,7 @@
+#
+# an endpoint or arbiter will ignore messages and stop sending messages on selected CANports 
+# true to ignore, 0 to use
+#
+
+uint8	NodeID
+bool[3] IgnoreCANPort

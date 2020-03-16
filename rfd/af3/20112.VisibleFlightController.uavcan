@@ -1,0 +1,8 @@
+#
+# the endpint sends this to show which Flight controllers it can see  ( valid servo messages)
+#
+#
+
+bool IsVFC
+uint64 UniqID
+bool[3] CANPresent
